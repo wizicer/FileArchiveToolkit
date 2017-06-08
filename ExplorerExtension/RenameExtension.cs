@@ -42,7 +42,10 @@ namespace ExplorerExtension
                 var fi = new FileInfo(filePath);
                 if (fi.Exists)
                 {
-                    fi.MoveTo(Path.Combine(fi.DirectoryName, $"{fi.LastWriteTime.ToString(format)}{fi.Name}"));
+                    var date = fi.LastWriteTime;
+                    if (fi.Extension == ".msg") date = GetMsgDateTime(fi) ?? date;
+
+                    fi.MoveTo(Path.Combine(fi.DirectoryName, $"{date.ToString(format)}{fi.Name}"));
                     count++;
                     continue;
                 }
@@ -59,6 +62,15 @@ namespace ExplorerExtension
             if (count == 0)
             {
                 MessageBox.Show($"No file renamed. The files intended to be renamed are:\r\n{string.Join("\r\n", SelectedItemPaths)}");
+            }
+        }
+
+        private DateTime? GetMsgDateTime(FileInfo fi)
+        {
+            using (var msg = new MsgReader.Outlook.Storage.Message(fi.FullName))
+            {
+                var sentOn = msg.SentOn;
+                return sentOn;
             }
         }
 
