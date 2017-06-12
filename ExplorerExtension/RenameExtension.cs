@@ -67,10 +67,18 @@ namespace ExplorerExtension
 
         private DateTime? GetMsgDateTime(FileInfo fi)
         {
-            using (var msg = new MsgReader.Outlook.Storage.Message(fi.FullName))
+            try
             {
-                var sentOn = msg.SentOn;
-                return sentOn;
+                using (var msg = new MsgReader.Outlook.Storage.Message(fi.FullName))
+                {
+                    var sentOn = msg.SentOn;
+                    return sentOn;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("error get msg date", ex);
+                return null;
             }
         }
 
